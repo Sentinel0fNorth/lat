@@ -1,0 +1,30 @@
+package com.example.lat.config;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+// @Component  // Temporarily disabled for testing
+public class DisabledAuthFilter extends OncePerRequestFilter {
+
+    // @Value("${app.auth.token}")
+    // private String expectedToken;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        // Temporarily allow all requests through - authentication disabled for testing
+        System.out.println("AuthFilter: Allowing request to " + request.getRequestURI());
+        filterChain.doFilter(request, response);
+    }
+}
