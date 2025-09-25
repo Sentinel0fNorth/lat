@@ -15,5 +15,10 @@ public class Student {
 
     private String name;
     private String rollNumber;
+
+    // Custom setter for ID (for update operations)
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
 

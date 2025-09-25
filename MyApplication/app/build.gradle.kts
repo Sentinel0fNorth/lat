@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapplication"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -57,6 +57,10 @@ dependencies {
     
     // ViewBinding
     implementation("androidx.databinding:viewbinding:8.1.4")
+    
+    // PDF Export (iText7)
+    implementation("com.itextpdf:itext7-core:7.2.5")
+    
     
     // Testing
     testImplementation(libs.junit)

@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +39,19 @@
             android:label="Attendance History"
             android:theme="@style/Theme.MyApplication"
             android:parentActivityName=".AttendanceActivity" />
+            
+        <activity
+            android:name=".StudentManagementActivity"
+            android:label="Manage Students"
+            android:theme="@style/Theme.MyApplication"
+            android:parentActivityName=".AttendanceActivity" />
+            
+        <activity
+            android:name=".LowAttendanceReportActivity"
+            android:label="Low Attendance Report"
+            android:theme="@style/Theme.MyApplication"
+            android:parentActivityName=".AttendanceActivity" />
+            
     </application>
 
 </manifest>

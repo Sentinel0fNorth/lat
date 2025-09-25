@@ -3,9 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     
     <item
-        android:id="@+id/action_history"
-        android:title="View History"
-        android:icon="@android:drawable/ic_menu_recent_history"
+        android:id="@+id/action_refresh"
+        android:title="Refresh Student List"
+        android:icon="@android:drawable/ic_popup_sync"
         app:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/action_manage_students"
+        android:title="Manage Students"
+        android:icon="@android:drawable/ic_menu_manage"
+        app:showAsAction="never" />
+        
+    <item
+        android:id="@+id/action_history"
+        android:title="Attendance History"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        app:showAsAction="never" />
+        
+    <item
+        android:id="@+id/action_low_attendance"
+        android:title="Low Attendance Report"
+        android:icon="@android:drawable/ic_menu_report_image"
+        app:showAsAction="never" />
         
 </menu>

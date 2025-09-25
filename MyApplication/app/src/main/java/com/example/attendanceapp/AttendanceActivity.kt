@@ -111,6 +111,8 @@ class AttendanceActivity : AppCompatActivity() {
                         if (students.isNotEmpty()) {
                             adapter = StudentAdapter(students)
                             binding.studentRecyclerView.adapter = adapter
+                            // Update toolbar subtitle with student count
+                            supportActionBar?.subtitle = "${students.size} students"
                         } else {
                             loadDummyStudents()
                         }
@@ -146,7 +148,10 @@ class AttendanceActivity : AppCompatActivity() {
         adapter = StudentAdapter(dummyStudents)
         binding.studentRecyclerView.adapter = adapter
         
-        Toast.makeText(this, "Loaded ${dummyStudents.size} demo students", Toast.LENGTH_SHORT).show()
+        // Update toolbar subtitle with student count
+        supportActionBar?.subtitle = "${dummyStudents.size} demo students"
+        
+        Toast.makeText(this, "Loaded ${dummyStudents.size} demo students (backend offline)", Toast.LENGTH_SHORT).show()
     }
     
     private fun submitAttendance() {
@@ -160,22 +165,49 @@ class AttendanceActivity : AppCompatActivity() {
         val attendanceMap = adapter.getAttendanceMap()
         val presentCount = attendanceMap.values.count { it }
         
-        // For now, let's just simulate success since the backend model is different
-        // In a real implementation, you'd need to send individual records for each student
-        showLoading(true)
+        // Create bulk attendance submission
+        val attendanceItems = attendanceMap.map { (studentId, isPresent) ->
+            com.example.attendanceapp.model.StudentAttendanceItem(studentId, isPresent)
+        }
         
-        // Simulate API call delay
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            showLoading(false)
-            Toast.makeText(
-                this@AttendanceActivity, 
-                "Attendance submitted successfully!\n$presentCount students marked present", 
-                Toast.LENGTH_LONG
-            ).show()
-            
-            // Clear selections after successful submission
-            adapter.clearAll()
-        }, 1500) // 1.5 second delay to simulate network call
+        val bulkSubmission = com.example.attendanceapp.model.BulkAttendanceSubmission(
+            date = dateFormat.format(selectedDate.time),
+            attendanceItems = attendanceItems
+        )
+        
+        val api = ApiClient.getClient().create(AttendanceApi::class.java)
+        api.submitBulkAttendanceSync(bulkSubmission).enqueue(object : Callback<List<com.example.attendanceapp.model.AttendanceRecord>> {
+            override fun onResponse(call: Call<List<com.example.attendanceapp.model.AttendanceRecord>>, response: Response<List<com.example.attendanceapp.model.AttendanceRecord>>) {
+                showLoading(false)
+                
+                if (response.isSuccessful) {
+                    val records = response.body()
+                    Toast.makeText(
+                        this@AttendanceActivity,
+                        "Attendance submitted successfully!\n$presentCount students marked present\n${records?.size ?: 0} records created",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    
+                    // Clear selections after successful submission
+                    adapter.clearAll()
+                } else {
+                    Toast.makeText(
+                        this@AttendanceActivity,
+                        "Failed to submit attendance: ${response.code()}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<com.example.attendanceapp.model.AttendanceRecord>>, t: Throwable) {
+                showLoading(false)
+                Toast.makeText(
+                    this@AttendanceActivity,
+                    "Network error: ${t.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
     }
     
     private fun showLoading(isLoading: Boolean) {
@@ -193,12 +225,41 @@ class AttendanceActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_refresh -> {
+                refreshStudentList()
+                true
+            }
+            R.id.action_manage_students -> {
+                val intent = Intent(this, StudentManagementActivity::class.java)
+                startActivity(intent)
+                true
+            }
             R.id.action_history -> {
                 val intent = Intent(this, AttendanceHistoryActivity::class.java)
                 startActivity(intent)
                 true
             }
+            R.id.action_low_attendance -> {
+                val intent = Intent(this, LowAttendanceReportActivity::class.java)
+                startActivity(intent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    
+    private fun refreshStudentList() {
+        Toast.makeText(this, "Refreshing student list...", Toast.LENGTH_SHORT).show()
+        loadStudents()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // Auto-refresh the student list when returning from other activities
+        // This ensures the list is always up-to-date
+        if (::adapter.isInitialized) {
+            loadStudents()
         }
     }
 }

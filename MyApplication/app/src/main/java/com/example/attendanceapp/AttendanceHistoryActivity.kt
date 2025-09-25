@@ -51,17 +51,54 @@ class AttendanceHistoryActivity : AppCompatActivity() {
     private fun loadAttendanceHistory() {
         showLoading(true)
         
-        // For now, show a message that this feature is coming soon
-        // since the backend model doesn't match the frontend expectations perfectly
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            showLoading(false)
-            Toast.makeText(
-                this@AttendanceHistoryActivity, 
-                "Attendance history feature coming soon!\nCurrently, attendance is being submitted successfully.", 
-                Toast.LENGTH_LONG
-            ).show()
-            showEmptyState()
-        }, 1000)
+        // Load attendance statistics from backend
+        val api = ApiClient.getClient().create(AttendanceApi::class.java)
+        api.getAttendanceStatisticsSync().enqueue(object : Callback<List<com.example.attendanceapp.model.AttendanceStatistics>> {
+            override fun onResponse(call: Call<List<com.example.attendanceapp.model.AttendanceStatistics>>, response: Response<List<com.example.attendanceapp.model.AttendanceStatistics>>) {
+                showLoading(false)
+                
+                if (response.isSuccessful) {
+                    val statistics = response.body() ?: emptyList()
+                    if (statistics.isEmpty()) {
+                        showEmptyState()
+                    } else {
+                        showStatisticsData(statistics)
+                    }
+                } else {
+                    showError("Failed to load attendance statistics: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<com.example.attendanceapp.model.AttendanceStatistics>>, t: Throwable) {
+                showLoading(false)
+                showError("Network error: ${t.message}")
+            }
+        })
+    }
+    
+    private fun showStatisticsData(statistics: List<com.example.attendanceapp.model.AttendanceStatistics>) {
+        // Create a simple display of attendance statistics
+        val message = "Attendance Statistics:\n\n" + 
+            statistics.joinToString("\n\n") { stat ->
+                "${stat.studentName} (${stat.rollNumber})\n" +
+                "Present: ${stat.presentDays}/${stat.totalDays} days\n" +
+                "Percentage: ${String.format("%.1f", stat.attendancePercentage)}%"
+            }
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Attendance History")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                showEmptyState() // Show empty state after closing dialog
+            }
+            .setCancelable(false)
+            .show()
+    }
+    
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        showEmptyState()
     }
 
     private fun showLoading(isLoading: Boolean) {
