@@ -1,0 +1,33 @@
+# Ignore Android project directory completely
+MyApplication/
+
+# Ignore Android-related files in root
+*.apk
+*.ap_
+*.dex
+local.properties
+
+# Gradle wrapper for Android (keep Maven wrapper)
+gradle/
+gradlew*
+settings.gradle.kts
+
+# Build outputs we don't want
+build/
+.gradle/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Test outputs
+.coverage/
+coverage/

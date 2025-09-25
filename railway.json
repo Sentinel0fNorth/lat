@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "java -Xmx512m -Dserver.port=$PORT -Dspring.profiles.active=prod -jar target/lat-0.0.1-SNAPSHOT.jar",
-    "healthcheckPath": "/actuator/health",
+    "healthcheckPath": "/api/ping",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
